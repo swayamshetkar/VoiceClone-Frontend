@@ -399,10 +399,10 @@ export default function Home() {
           </a>
           <div className="nav-links">
             <a href="https://huggingface.co/spaces/swayamshetkar/Vdub-orchestrator" target="_blank" rel="noopener noreferrer" title="Hugging Face Backend">
-              🤗 Backend
+              🤗 Backend Repo
             </a>
             <a href="https://github.com/swayamshetkar/VoiceClone-Frontend" target="_blank" rel="noopener noreferrer" title="GitHub Repository">
-              Frontend
+              Frontend Repo
             </a>
           </div>
           <div className={`health ${backendStatus === "Backend Online" ? "online" : "offline"}`}>
