@@ -97,6 +97,7 @@ export default function Home() {
   const [backendStatus, setBackendStatus] = useState("Checking");
   const [isDragging, setIsDragging] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(0);
+  const [showFlow, setShowFlow] = useState(false);
   const fileInputRef = useRef(null);
 
   const mode = useMemo(() => modes.find((item) => item.id === modeId), [modeId]);
@@ -420,7 +421,9 @@ export default function Home() {
             </p>
             <div className="hero-actions">
               <a href="#studio">Start a job</a>
-              <a href="#motion">View flow</a>
+              <button type="button" onClick={() => setShowFlow(!showFlow)} className="view-flow-btn">
+                {showFlow ? "Hide flow" : "View flow"}
+              </button>
             </div>
             <div className="spec-row" aria-label="Upload limits">
               <span>100 MB video</span>
@@ -585,37 +588,312 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="motion-section" id="motion" data-reveal>
-        <div className="motion-copy">
-          <p className="eyebrow">Flow</p>
-          <h2>Upload, wait, download.</h2>
-          <p>
-            The interface stays lightweight while the Main Backend handles validation, conversion, orchestration, and final media output.
-          </p>
-        </div>
-        <div className="media-ribbon" aria-hidden="true">
-          <video
-            autoPlay
-            className="transition-video"
-            loop
-            muted
-            playsInline
-            poster="/assets/dubbing-studio-hero.png"
-          >
-            <source src="/assets/studio-transition.mp4" type="video/mp4" />
-          </video>
-          <div className="media-frame frame-one" />
-          <div className="media-frame frame-two" />
-          <div className="media-frame frame-three" />
-          <div className="wave-card">
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
+      {showFlow && (
+        <section className="documentation-section" data-reveal>
+          <div className="doc-container">
+            <div className="doc-header">
+              <button type="button" onClick={() => setShowFlow(false)} className="close-docs-btn">×</button>
+              <h1>AI Video Dubbing Platform</h1>
+              <p className="doc-subtitle">Complete System Architecture & Documentation</p>
+            </div>
+
+            <div className="doc-content">
+              <div className="doc-section">
+                <h2>Overview</h2>
+                <p>A modular AI-powered video dubbing platform capable of:</p>
+                <ul>
+                  <li>Speech-to-text transcription</li>
+                  <li>Language translation</li>
+                  <li>Voice cloning</li>
+                  <li>Audio synchronization</li>
+                  <li>Lip synchronization</li>
+                  <li>End-to-end dubbed video generation</li>
+                </ul>
+              </div>
+
+              <div className="doc-section">
+                <h2>Workflow Modes</h2>
+                
+                <div className="workflow-mode">
+                  <h3>Mode 1 — Video Dubbing</h3>
+                  <div className="mode-io">
+                    <div className="io-block">
+                      <strong>Input:</strong>
+                      <ul>
+                        <li>Video</li>
+                        <li>Target Language</li>
+                      </ul>
+                    </div>
+                    <div className="io-block">
+                      <strong>Output:</strong>
+                      <ul>
+                        <li>final.mp4</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="pipeline">
+                    <strong>Pipeline:</strong>
+                    <pre>Video → Extract Audio → API1 /process → API2 /generate
+→ API1 /sync → API4 /render-video → Final Dubbed Video</pre>
+                  </div>
+                </div>
+
+                <div className="workflow-mode">
+                  <h3>Mode 2 — Audio Dubbing</h3>
+                  <div className="mode-io">
+                    <div className="io-block">
+                      <strong>Input:</strong>
+                      <ul>
+                        <li>Audio</li>
+                        <li>Target Language</li>
+                      </ul>
+                    </div>
+                    <div className="io-block">
+                      <strong>Output:</strong>
+                      <ul>
+                        <li>synced.wav</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="pipeline">
+                    <strong>Pipeline:</strong>
+                    <pre>Audio → API1 /process → API2 /generate → API1 /sync → synced.wav</pre>
+                  </div>
+                </div>
+
+                <div className="workflow-mode">
+                  <h3>Mode 3 — Voice Cloning</h3>
+                  <div className="mode-io">
+                    <div className="io-block">
+                      <strong>Input:</strong>
+                      <ul>
+                        <li>Reference Audio</li>
+                        <li>Text</li>
+                      </ul>
+                    </div>
+                    <div className="io-block">
+                      <strong>Output:</strong>
+                      <ul>
+                        <li>generated.wav</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="pipeline">
+                    <strong>Pipeline:</strong>
+                    <pre>Reference Audio → API2 /generate → Generated Audio</pre>
+                  </div>
+                </div>
+              </div>
+
+              <div className="doc-section">
+                <h2>System Architecture</h2>
+                <table className="doc-table">
+                  <thead>
+                    <tr>
+                      <th>Component</th>
+                      <th>Responsibility</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Frontend</td>
+                      <td>User Interaction & Upload Studio</td>
+                    </tr>
+                    <tr>
+                      <td>Main Backend</td>
+                      <td>Workflow Orchestration & Coordination</td>
+                    </tr>
+                    <tr>
+                      <td>API1 /process</td>
+                      <td>Transcription + Translation + Segmentation</td>
+                    </tr>
+                    <tr>
+                      <td>API1 /sync</td>
+                      <td>Audio Synchronization with WhisperX</td>
+                    </tr>
+                    <tr>
+                      <td>API2 /generate</td>
+                      <td>Voice Cloning & Speech Generation</td>
+                    </tr>
+                    <tr>
+                      <td>API4 /render-video</td>
+                      <td>Lip Sync (Wav2Lip) & Video Rendering</td>
+                    </tr>
+                    <tr>
+                      <td>WhisperX</td>
+                      <td>Speech Recognition & Alignment</td>
+                    </tr>\n                    <tr>
+                      <td>NLLB</td>
+                      <td>Multi-language Translation</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="doc-section">
+                <h2>API Specifications</h2>
+                
+                <div className="api-spec">
+                  <h3>📨 API1 - Processing Service</h3>
+                  <p><strong>Endpoint:</strong> POST /process</p>
+                  <p><strong>Purpose:</strong> Transcription, Translation & Segmentation</p>
+                  <p><strong>Input:</strong> WAV Audio + Target Language</p>
+                  <p><strong>Output:</strong> Transcription, Translation, Segments</p>
+                </div>
+
+                <div className="api-spec">
+                  <h3>🔄 API1 - Synchronization Service</h3>
+                  <p><strong>Endpoint:</strong> POST /sync</p>
+                  <p><strong>Purpose:</strong> Sync generated audio with original timing</p>
+                  <p><strong>Input:</strong> Generated Audio + Original Segments</p>
+                  <p><strong>Output:</strong> synced.wav (time-aligned)</p>
+                </div>
+
+                <div className="api-spec">
+                  <h3>🎙️ API2 - Voice Generation</h3>
+                  <p><strong>Endpoint:</strong> POST /generate</p>
+                  <p><strong>Purpose:</strong> Voice cloning and speech generation</p>
+                  <p><strong>Input:</strong> Reference Audio + Text</p>
+                  <p><strong>Provider:</strong> k2-fsa-omnivoice (via Gradio API)</p>\n                  <p><strong>Output:</strong> Generated WAV audio</p>
+                </div>
+
+                <div className="api-spec">
+                  <h3>🎬 API4 - Video Rendering</h3>
+                  <p><strong>Endpoint:</strong> POST /render-video</p>
+                  <p><strong>Purpose:</strong> Lip sync & final video generation</p>
+                  <p><strong>Input:</strong> Original Video + Synced Audio</p>
+                  <p><strong>Technology:</strong> Wav2Lip for lip synchronization</p>
+                  <p><strong>Output:</strong> final.mp4 (dubbed video)</p>
+                </div>
+              </div>
+
+              <div className="doc-section">
+                <h2>Supported Languages</h2>
+                <table className="languages-table">
+                  <thead>
+                    <tr>
+                      <th>Language</th>
+                      <th>Code</th>
+                      <th>Language</th>
+                      <th>Code</th>
+                      <th>Language</th>
+                      <th>Code</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>🇬🇧 English</td>
+                      <td>en</td>
+                      <td>🇸🇦 Arabic</td>
+                      <td>ar</td>
+                      <td>🇭🇺 Hungarian</td>
+                      <td>hu</td>
+                    </tr>
+                    <tr>
+                      <td>🇪🇸 Spanish</td>
+                      <td>es</td>
+                      <td>🇨🇳 Chinese</td>
+                      <td>zh-cn</td>
+                      <td>🇰🇷 Korean</td>
+                      <td>ko</td>
+                    </tr>
+                    <tr>
+                      <td>🇫🇷 French</td>
+                      <td>fr</td>
+                      <td>🇯🇵 Japanese</td>
+                      <td>ja</td>
+                      <td>🇮🇳 Hindi</td>
+                      <td>hi</td>
+                    </tr>
+                    <tr>
+                      <td>🇩🇪 German</td>
+                      <td>de</td>
+                      <td>🇵🇱 Polish</td>
+                      <td>pl</td>
+                      <td>🇵🇹 Portuguese</td>
+                      <td>pt</td>
+                    </tr>
+                    <tr>
+                      <td>🇮🇹 Italian</td>
+                      <td>it</td>
+                      <td>🇹🇷 Turkish</td>
+                      <td>tr</td>
+                      <td>🇷🇺 Russian</td>
+                      <td>ru</td>
+                    </tr>
+                    <tr>
+                      <td>🇳🇱 Dutch</td>
+                      <td>nl</td>
+                      <td>🇨🇿 Czech</td>
+                      <td>cs</td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="doc-section">
+                <h2>Security & Deployment</h2>
+                <div className="security-box">
+                  <h3>🔒 Security Principles</h3>
+                  <ul>
+                    <li>✓ Never expose HF tokens</li>
+                    <li>✓ Never expose internal endpoints</li>
+                    <li>✓ Never expose provider credentials</li>
+                    <li>✓ Never commit .env files</li>
+                  </ul>
+                </div>
+                <div className="deployment-box">
+                  <h3>🚀 Deployment Architecture</h3>
+                  <table className="deployment-table">
+                    <thead>
+                      <tr>
+                        <th>Service</th>
+                        <th>Platform</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Frontend</td>
+                        <td>Vercel (Serverless)</td>
+                      </tr>
+                      <tr>
+                        <td>Main Backend</td>
+                        <td>Hugging Face Space</td>
+                      </tr>
+                      <tr>
+                        <td>API1, API2, API4</td>
+                        <td>Hugging Face Spaces</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="doc-section">
+                <h2>Future Improvements</h2>
+                <ul className="improvements-list">
+                  <li>✨ Better TTS Models</li>
+                  <li>✨ Improved Hindi Voice Cloning</li>
+                  <li>✨ MuseTalk Integration</li>
+                  <li>✨ Better Lip Synchronization Models</li>
+                  <li>✨ Queue System for long jobs</li>
+                  <li>✨ User Accounts & History</li>
+                  <li>✨ Usage Analytics</li>
+                  <li>✨ GPU Optimization</li>
+                  <li>✨ Batch Processing</li>
+                  <li>✨ Distributed Workers</li>
+                </ul>
+              </div>
+
+              <div className="doc-footer">
+                <p><strong>👤 Author:</strong> Swayam Shetkar</p>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </main>
   );
 }
