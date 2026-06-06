@@ -3,6 +3,12 @@
 import Lenis from "lenis";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import StudioPanel from './components/StudioPanel';
+import DocsSection from './components/DocsSection';
+import Footer from './components/Footer';
+
 const BACKEND_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
 const MAX_VIDEO_SIZE = 100 * 1024 * 1024;
 const MAX_AUDIO_SIZE = 50 * 1024 * 1024;
@@ -97,8 +103,8 @@ export default function Home() {
   const [backendStatus, setBackendStatus] = useState("Checking");
   const [isDragging, setIsDragging] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(0);
-  const [showFlow, setShowFlow] = useState(false);
   const fileInputRef = useRef(null);
+  const lenisRef = useRef(null);
 
   const mode = useMemo(() => modes.find((item) => item.id === modeId), [modeId]);
   const acceptValue = mode.allowedExtensions.join(",");
@@ -112,6 +118,7 @@ export default function Home() {
       smoothWheel: true,
       wheelMultiplier: 0.85
     });
+    lenisRef.current = lenis;
     let frameId;
 
     function raf(time) {
@@ -392,508 +399,57 @@ export default function Home() {
 
   return (
     <main className="app-shell">
-      <section className="hero" data-reveal>
-        <div className="hero-image" aria-hidden="true" />
-        <nav className="nav-bar">
-          <a className="brand" href="#top" aria-label="VoiceFront home">
-            VoiceFront
-          </a>
-          <div className="nav-links">
-            <a href="https://huggingface.co/spaces/swayamshetkar/Vdub-orchestrator" target="_blank" rel="noopener noreferrer" title="Hugging Face Backend">
-              🤗 Backend Repo
-            </a>
-            <a href="https://github.com/swayamshetkar/VoiceClone-Frontend" target="_blank" rel="noopener noreferrer" title="GitHub Repository">
-              Frontend Repo
-            </a>
-          </div>
-          <div className={`health ${backendStatus === "Backend Online" ? "online" : "offline"}`}>
-            <span />
-            {backendStatus}
-          </div>
-        </nav>
+      <Navbar backendStatus={backendStatus} />
 
-        <div className="hero-grid" id="top">
-          <div className="hero-copy">
-            <p className="eyebrow">Main backend only</p>
-            <h1>Dub video, translate audio, clone voice.</h1>
-            <p className="hero-text">
-              A focused upload studio for localization jobs, clean downloads, and a smoother wait while the backend does the heavy lifting.
-            </p>
-            <div className="hero-actions">
-              <a href="#studio">Start a job</a>
-              <button type="button" onClick={() => setShowFlow(!showFlow)} className="view-flow-btn">
-                {showFlow ? "Hide flow" : "View flow"}
-              </button>
-            </div>
-            <div className="spec-row" aria-label="Upload limits">
-              <span>100 MB video</span>
-              <span>50 MB audio</span>
-              <span>Direct backend calls</span>
-            </div>
-          </div>
+      <Hero
+        onScrollToStudio={() => {
+          if (lenisRef.current) {
+            lenisRef.current.scrollTo('#studio');
+          } else {
+            document.getElementById('studio')?.scrollIntoView({ behavior: 'smooth' });
+          }
+        }}
+        onScrollToDocs={() => {
+          if (lenisRef.current) {
+            lenisRef.current.scrollTo('#documentation');
+          } else {
+            document.getElementById('documentation')?.scrollIntoView({ behavior: 'smooth' });
+          }
+        }}
+      />
 
-          <form className="tool-panel" id="studio" onSubmit={handleSubmit} data-reveal>
-            <div className="panel-heading">
-              <div>
-                <p className="eyebrow">Create</p>
-                <h2>{mode.label}</h2>
-              </div>
-              <span className={`state-pill ${state.toLowerCase()}`}>{state}</span>
-            </div>
+      <StudioPanel
+        mode={mode}
+        modes={modes}
+        modeId={modeId}
+        form={form}
+        state={state}
+        statusText={statusText}
+        error={error}
+        isBusy={isBusy}
+        isDragging={isDragging}
+        submitLabel={submitLabel}
+        fileInputKey={fileInputKey}
+        fileInputRef={fileInputRef}
+        acceptValue={acceptValue}
+        onSubmit={handleSubmit}
+        onSwitchMode={switchMode}
+        onFileSelect={handleFileSelection}
+        onClear={clearFile}
+        onDragEnter={() => { if (!isBusy) setIsDragging(true); }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={(e) => { setIsDragging(false); if (!isBusy) handleFileSelection(e.dataTransfer.files?.[0] || null); }}
+        onUpdateForm={updateForm}
+        onOpenFileDialog={openFileDialog}
+        LANGUAGES={LANGUAGES}
+        MAX_TEXT_LENGTH={MAX_TEXT_LENGTH}
+        RUN_STATES={RUN_STATES}
+        formatBytes={formatBytes}
+      />
 
-            <div className="mode-tabs" role="tablist" aria-label="Application modes">
-              {modes.map((item) => (
-                <button
-                  aria-selected={item.id === modeId}
-                  className={item.id === modeId ? "active" : ""}
-                  disabled={isBusy}
-                  key={item.id}
-                  onClick={() => switchMode(item.id)}
-                  role="tab"
-                  type="button"
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
+      <DocsSection />
 
-            <input
-              accept={acceptValue}
-              className="visually-hidden"
-              disabled={isBusy}
-              key={fileInputKey}
-              onChange={(event) => handleFileSelection(event.target.files?.[0] || null)}
-              ref={fileInputRef}
-              type="file"
-            />
-
-            <div
-              className={`dropzone ${isDragging ? "dragging" : ""} ${form.file ? "has-file" : ""}`}
-              onClick={openFileDialog}
-              onDragEnter={(event) => {
-                event.preventDefault();
-                if (!isBusy) {
-                  setIsDragging(true);
-                }
-              }}
-              onDragLeave={(event) => {
-                event.preventDefault();
-                setIsDragging(false);
-              }}
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={(event) => {
-                event.preventDefault();
-                setIsDragging(false);
-                if (!isBusy) {
-                  handleFileSelection(event.dataTransfer.files?.[0] || null);
-                }
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  openFileDialog();
-                }
-              }}
-              role="button"
-              tabIndex={0}
-            >
-              <span className="drop-icon">+</span>
-              <div>
-                <strong>{form.file ? form.file.name : mode.fileLabel}</strong>
-                <p>
-                  {form.file
-                    ? `${formatBytes(form.file.size)} selected`
-                    : `Drop or browse ${mode.allowedExtensions.join(", ")}`}
-                </p>
-              </div>
-              {form.file && (
-                <button className="clear-file" disabled={isBusy} onClick={clearFile} type="button">
-                  Remove
-                </button>
-              )}
-            </div>
-
-            {mode.id !== "clone" && (
-              <label>
-                <span>{mode.languageLabel}</span>
-                <select
-                  disabled={isBusy}
-                  onChange={(event) => updateForm("targetLanguage", event.target.value)}
-                  required
-                  value={form.targetLanguage}
-                >
-                  <option value="" disabled>
-                    Select language
-                  </option>
-                  {LANGUAGES.map((language) => (
-                    <option key={language} value={language}>
-                      {language}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-
-            {mode.id === "clone" && (
-              <label>
-                <span>Text</span>
-                <textarea
-                  disabled={isBusy}
-                  maxLength={MAX_TEXT_LENGTH}
-                  onChange={(event) => updateForm("text", event.target.value)}
-                  placeholder="Enter text to synthesize"
-                  required
-                  rows={5}
-                  value={form.text}
-                />
-              </label>
-            )}
-
-            {mode.id === "video" && (
-              <>
-                <p className="testing-warning">⚠️ Video Dubbing is in testing phase. Results may be inappropriate.</p>
-                <p className="estimate-note">Final video generation usually takes around 5 minutes.</p>
-              </>
-            )}
-
-            {mode.id === "audio" && (
-              <p className="testing-warning">⚠️ Audio Dubbing is in testing phase. Results may be inappropriate.</p>
-            )}
-
-            <div className="progress-track" aria-label="Processing states">
-              {RUN_STATES.map((item) => (
-                <span
-                  className={
-                    item === state || (state === "Failed" && item === "Processing") ? "active" : ""
-                  }
-                  key={item}
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
-
-            <div className="status-row">
-              <div>
-                <span className="state-label">Status</span>
-                <strong>{statusText}</strong>
-              </div>
-              <button disabled={isBusy} type="submit">
-                {submitLabel}
-              </button>
-            </div>
-
-            {error && <p className="error-message">{error}</p>}
-          </form>
-        </div>
-      </section>
-
-      {showFlow && (
-        <section className="documentation-section" data-reveal>
-          <div className="doc-container">
-            <div className="doc-header">
-              <button type="button" onClick={() => setShowFlow(false)} className="close-docs-btn">×</button>
-              <h1>AI Video Dubbing Platform</h1>
-              <p className="doc-subtitle">Complete System Architecture & Documentation</p>
-            </div>
-
-            <div className="doc-content">
-              <div className="doc-section">
-                <h2>Overview</h2>
-                <p>A modular AI-powered video dubbing platform capable of:</p>
-                <ul>
-                  <li>Speech-to-text transcription</li>
-                  <li>Language translation</li>
-                  <li>Voice cloning</li>
-                  <li>Audio synchronization</li>
-                  <li>Lip synchronization</li>
-                  <li>End-to-end dubbed video generation</li>
-                </ul>
-              </div>
-
-              <div className="doc-section">
-                <h2>Workflow Modes</h2>
-                
-                <div className="workflow-mode">
-                  <h3>Mode 1 — Video Dubbing</h3>
-                  <div className="mode-io">
-                    <div className="io-block">
-                      <strong>Input:</strong>
-                      <ul>
-                        <li>Video</li>
-                        <li>Target Language</li>
-                      </ul>
-                    </div>
-                    <div className="io-block">
-                      <strong>Output:</strong>
-                      <ul>
-                        <li>final.mp4</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="pipeline">
-                    <strong>Pipeline:</strong>
-                    <pre>Video → Extract Audio → API1 /process → API2 /generate
-→ API1 /sync → API4 /render-video → Final Dubbed Video</pre>
-                  </div>
-                </div>
-
-                <div className="workflow-mode">
-                  <h3>Mode 2 — Audio Dubbing</h3>
-                  <div className="mode-io">
-                    <div className="io-block">
-                      <strong>Input:</strong>
-                      <ul>
-                        <li>Audio</li>
-                        <li>Target Language</li>
-                      </ul>
-                    </div>
-                    <div className="io-block">
-                      <strong>Output:</strong>
-                      <ul>
-                        <li>synced.wav</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="pipeline">
-                    <strong>Pipeline:</strong>
-                    <pre>Audio → API1 /process → API2 /generate → API1 /sync → synced.wav</pre>
-                  </div>
-                </div>
-
-                <div className="workflow-mode">
-                  <h3>Mode 3 — Voice Cloning</h3>
-                  <div className="mode-io">
-                    <div className="io-block">
-                      <strong>Input:</strong>
-                      <ul>
-                        <li>Reference Audio</li>
-                        <li>Text</li>
-                      </ul>
-                    </div>
-                    <div className="io-block">
-                      <strong>Output:</strong>
-                      <ul>
-                        <li>generated.wav</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="pipeline">
-                    <strong>Pipeline:</strong>
-                    <pre>Reference Audio → API2 /generate → Generated Audio</pre>
-                  </div>
-                </div>
-              </div>
-
-              <div className="doc-section">
-                <h2>System Architecture</h2>
-                <table className="doc-table">
-                  <thead>
-                    <tr>
-                      <th>Component</th>
-                      <th>Responsibility</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Frontend</td>
-                      <td>User Interaction & Upload Studio</td>
-                    </tr>
-                    <tr>
-                      <td>Main Backend</td>
-                      <td>Workflow Orchestration & Coordination</td>
-                    </tr>
-                    <tr>
-                      <td>API1 /process</td>
-                      <td>Transcription + Translation + Segmentation</td>
-                    </tr>
-                    <tr>
-                      <td>API1 /sync</td>
-                      <td>Audio Synchronization with WhisperX</td>
-                    </tr>
-                    <tr>
-                      <td>API2 /generate</td>
-                      <td>Voice Cloning & Speech Generation</td>
-                    </tr>
-                    <tr>
-                      <td>API4 /render-video</td>
-                      <td>Lip Sync (Wav2Lip) & Video Rendering</td>
-                    </tr>
-                    <tr>
-                      <td>WhisperX</td>
-                      <td>Speech Recognition & Alignment</td>
-                    </tr>\n                    <tr>
-                      <td>NLLB</td>
-                      <td>Multi-language Translation</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="doc-section">
-                <h2>API Specifications</h2>
-                
-                <div className="api-spec">
-                  <h3>📨 API1 - Processing Service</h3>
-                  <p><strong>Endpoint:</strong> POST /process</p>
-                  <p><strong>Purpose:</strong> Transcription, Translation & Segmentation</p>
-                  <p><strong>Input:</strong> WAV Audio + Target Language</p>
-                  <p><strong>Output:</strong> Transcription, Translation, Segments</p>
-                </div>
-
-                <div className="api-spec">
-                  <h3>🔄 API1 - Synchronization Service</h3>
-                  <p><strong>Endpoint:</strong> POST /sync</p>
-                  <p><strong>Purpose:</strong> Sync generated audio with original timing</p>
-                  <p><strong>Input:</strong> Generated Audio + Original Segments</p>
-                  <p><strong>Output:</strong> synced.wav (time-aligned)</p>
-                </div>
-
-                <div className="api-spec">
-                  <h3>🎙️ API2 - Voice Generation</h3>
-                  <p><strong>Endpoint:</strong> POST /generate</p>
-                  <p><strong>Purpose:</strong> Voice cloning and speech generation</p>
-                  <p><strong>Input:</strong> Reference Audio + Text</p>
-                  <p><strong>Provider:</strong> k2-fsa-omnivoice (via Gradio API)</p>\n                  <p><strong>Output:</strong> Generated WAV audio</p>
-                </div>
-
-                <div className="api-spec">
-                  <h3>🎬 API4 - Video Rendering</h3>
-                  <p><strong>Endpoint:</strong> POST /render-video</p>
-                  <p><strong>Purpose:</strong> Lip sync & final video generation</p>
-                  <p><strong>Input:</strong> Original Video + Synced Audio</p>
-                  <p><strong>Technology:</strong> Wav2Lip for lip synchronization</p>
-                  <p><strong>Output:</strong> final.mp4 (dubbed video)</p>
-                </div>
-              </div>
-
-              <div className="doc-section">
-                <h2>Supported Languages</h2>
-                <table className="languages-table">
-                  <thead>
-                    <tr>
-                      <th>Language</th>
-                      <th>Code</th>
-                      <th>Language</th>
-                      <th>Code</th>
-                      <th>Language</th>
-                      <th>Code</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>🇬🇧 English</td>
-                      <td>en</td>
-                      <td>🇸🇦 Arabic</td>
-                      <td>ar</td>
-                      <td>🇭🇺 Hungarian</td>
-                      <td>hu</td>
-                    </tr>
-                    <tr>
-                      <td>🇪🇸 Spanish</td>
-                      <td>es</td>
-                      <td>🇨🇳 Chinese</td>
-                      <td>zh-cn</td>
-                      <td>🇰🇷 Korean</td>
-                      <td>ko</td>
-                    </tr>
-                    <tr>
-                      <td>🇫🇷 French</td>
-                      <td>fr</td>
-                      <td>🇯🇵 Japanese</td>
-                      <td>ja</td>
-                      <td>🇮🇳 Hindi</td>
-                      <td>hi</td>
-                    </tr>
-                    <tr>
-                      <td>🇩🇪 German</td>
-                      <td>de</td>
-                      <td>🇵🇱 Polish</td>
-                      <td>pl</td>
-                      <td>🇵🇹 Portuguese</td>
-                      <td>pt</td>
-                    </tr>
-                    <tr>
-                      <td>🇮🇹 Italian</td>
-                      <td>it</td>
-                      <td>🇹🇷 Turkish</td>
-                      <td>tr</td>
-                      <td>🇷🇺 Russian</td>
-                      <td>ru</td>
-                    </tr>
-                    <tr>
-                      <td>🇳🇱 Dutch</td>
-                      <td>nl</td>
-                      <td>🇨🇿 Czech</td>
-                      <td>cs</td>
-                      <td></td>
-                      <td></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="doc-section">
-                <h2>Security & Deployment</h2>
-                <div className="security-box">
-                  <h3>🔒 Security Principles</h3>
-                  <ul>
-                    <li>✓ Never expose HF tokens</li>
-                    <li>✓ Never expose internal endpoints</li>
-                    <li>✓ Never expose provider credentials</li>
-                    <li>✓ Never commit .env files</li>
-                  </ul>
-                </div>
-                <div className="deployment-box">
-                  <h3>🚀 Deployment Architecture</h3>
-                  <table className="deployment-table">
-                    <thead>
-                      <tr>
-                        <th>Service</th>
-                        <th>Platform</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Frontend</td>
-                        <td>Vercel (Serverless)</td>
-                      </tr>
-                      <tr>
-                        <td>Main Backend</td>
-                        <td>Hugging Face Space</td>
-                      </tr>
-                      <tr>
-                        <td>API1, API2, API4</td>
-                        <td>Hugging Face Spaces</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className="doc-section">
-                <h2>Future Improvements</h2>
-                <ul className="improvements-list">
-                  <li>✨ Better TTS Models</li>
-                  <li>✨ Improved Hindi Voice Cloning</li>
-                  <li>✨ MuseTalk Integration</li>
-                  <li>✨ Better Lip Synchronization Models</li>
-                  <li>✨ Queue System for long jobs</li>
-                  <li>✨ User Accounts & History</li>
-                  <li>✨ Usage Analytics</li>
-                  <li>✨ GPU Optimization</li>
-                  <li>✨ Batch Processing</li>
-                  <li>✨ Distributed Workers</li>
-                </ul>
-              </div>
-
-              <div className="doc-footer">
-                <p><strong>👤 Author:</strong> Swayam Shetkar</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+      <Footer />
     </main>
   );
 }
