@@ -89,7 +89,7 @@ const initialForm = {
 };
 
 export default function Home() {
-  const [modeId, setModeId] = useState("video");
+  const [modeId, setModeId] = useState("clone");
   const [form, setForm] = useState(initialForm);
   const [state, setState] = useState("Idle");
   const [statusText, setStatusText] = useState("Ready");
@@ -397,6 +397,14 @@ export default function Home() {
           <a className="brand" href="#top" aria-label="VoiceFront home">
             VoiceFront
           </a>
+          <div className="nav-links">
+            <a href="https://huggingface.co/spaces/swayamshetkar/Vdub-orchestrator" target="_blank" rel="noopener noreferrer" title="Hugging Face Backend">
+              🤗 Backend
+            </a>
+            <a href="https://github.com/swayamshetkar/VoiceClone-Frontend" target="_blank" rel="noopener noreferrer" title="GitHub Repository">
+              Frontend
+            </a>
+          </div>
           <div className={`health ${backendStatus === "Backend Online" ? "online" : "offline"}`}>
             <span />
             {backendStatus}
@@ -539,7 +547,14 @@ export default function Home() {
             )}
 
             {mode.id === "video" && (
-              <p className="estimate-note">Final video generation usually takes around 5 minutes.</p>
+              <>
+                <p className="testing-warning">⚠️ Video Dubbing is in testing phase. Results may be inappropriate.</p>
+                <p className="estimate-note">Final video generation usually takes around 5 minutes.</p>
+              </>
+            )}
+
+            {mode.id === "audio" && (
+              <p className="testing-warning">⚠️ Audio Dubbing is in testing phase. Results may be inappropriate.</p>
             )}
 
             <div className="progress-track" aria-label="Processing states">

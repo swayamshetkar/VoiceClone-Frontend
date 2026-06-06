@@ -132,6 +132,43 @@ button {
   box-shadow: 0 0 20px rgba(255, 119, 110, 0.42);
 }
 
+.nav-links {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.nav-links a {
+  backdrop-filter: blur(16px);
+  background: rgba(13, 18, 24, 0.68);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 12px;
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.nav-links a:hover {
+  background: rgba(75, 199, 182, 0.16);
+  border-color: rgba(75, 199, 182, 0.4);
+  color: var(--teal);
+  transform: translateY(-2px);
+}
+
+.testing-warning {
+  animation: messageIn 240ms ease both;
+  background: rgba(255, 119, 110, 0.15);
+  border: 1px solid rgba(255, 119, 110, 0.48);
+  border-radius: 8px;
+  color: #ff9d94;
+  font-weight: 700;
+  line-height: 1.45;
+  margin: 0;
+  padding: 12px;
+}
+
 .hero-grid {
   align-items: center;
   display: grid;
