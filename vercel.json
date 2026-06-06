@@ -9,8 +9,5 @@
       "maxDuration": 60
     }
   },
-  "regions": ["iad1"],
-  "env": {
-    "NEXT_PUBLIC_BACKEND_URL": "@next_public_backend_url"
-  }
+  "regions": ["iad1"]
 }
